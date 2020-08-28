@@ -5,12 +5,12 @@ Collect information from backup FILE or DIRECTORY
 - Directadmin backup
 ## How to use?
 ```
-sh main.sh [backup]
+sh main.sh [backup file or directory]
 ```
 ## Example:
 ### cPanel
 ```
-sh main.sh cpmove-thanh
+[root@local backups]# sh main.sh cpmove-thanh
 {
     "user": {
         "name": "thanh",
