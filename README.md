@@ -19,7 +19,7 @@ sh main.sh [backup file or directory]
     },
     "domain": {
         "main": "thanh.com",
-         "addon": ["thanh-addon1.net", "thanh-addon2.net"],
+        "addon": ["thanh-addon1.net", "thanh-addon2.net"],
         "alias": {
             "thanh.com": "[thanh-alias1.com, thanh-alias2.com, thanh-alias3.com]",
             "thanh-addon2.net": "thanh-addon2-alias1.info"
