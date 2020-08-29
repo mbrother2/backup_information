@@ -21,12 +21,12 @@ sh main.sh [backup file or directory]
         "main": "thanh.com",
         "addon": ["thanh-addon1.net", "thanh-addon2.net"],
         "alias": {
-            "thanh.com": "[thanh-alias1.com, thanh-alias2.com, thanh-alias3.com]",
+            "thanh.com": ["thanh-alias1.com", "thanh-alias2.com", "thanh-alias3.com"],
             "thanh-addon2.net": "thanh-addon2-alias1.info"
         },
         "sub": {
             "thanh-addon1.net": "sub1",
-            "thanh.com": "[sub1, sub2, sub3]",
+            "thanh.com": ["sub1", "sub2", "sub3"],
             "thanh-addon2.net": ""
         }
     },
@@ -57,12 +57,12 @@ sh main.sh [backup file or directory]
         "main": "thanh.com",
         "addon": ["thanh-addon1.net", "thanh-addon2.net"],
         "alias": {
-            "thanh.com": "[thanh-alias1.com, thanh-alias2.com, thanh-alias3.com]",
+            "thanh.com": ["thanh-alias1.com", "thanh-alias2.com", "thanh-alias3.com"],
             "thanh-addon2.net": "thanh-addon2-alias1.info"
         },
         "sub": {
             "thanh-addon1.net": "sub1",
-            "thanh.com": "[sub1, sub2, sub3]",
+            "thanh.com": ["sub1", "sub2", "sub3"],
             "thanh-addon2.net": ""
         }
     },
