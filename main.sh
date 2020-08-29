@@ -1,8 +1,17 @@
 #!/bin/bash
 
+_package(){
+    VAR=$1
+    VALUE=` cat "${USER_CONF}" | grep "^$2=" | cut -d'=' -f2`
+    if [ "${VALUE}" == "0" ]
+    then
+        VALUE="unlimited"
+    fi
+    eval "$VAR"="${VALUE}"
+}
+
 _cpanel(){
     # User
-    USER_NAME=`ls -1 ${BACKUP_DIR}/cp`
     USER_PASS=`cat ${BACKUP_DIR}/shadow`
     USER_SHELL=`cat ${BACKUP_DIR}/shell`
     
@@ -35,7 +44,7 @@ _cpanel(){
         SUB_ADDON_DOMAIN=`cat ${BACKUP_DIR}/userdata/main | sed -n '/addon_domains/,/^[a-zA-Z0-9_]/p' | grep "^\s" | awk '{print $2}'`
         REAL_SUBDOMAIN=`echo "${SUB_DOMAIN}" | grep -v "${SUB_ADDON_DOMAIN}"`
         ALL_DOMAIN=$(cat ${BACKUP_DIR}/userdata/main | grep '^main_domain:' | cut -d' ' -f2
-            cat ${BACKUP_DIR}/userdata/main | sed -n '/addon_domains/,/^[a-zA-Z0-9_]/p' | grep "^\s" | cut -d':' -f1 | awk '{print $1}'
+        cat ${BACKUP_DIR}/userdata/main | sed -n '/addon_domains/,/^[a-zA-Z0-9_]/p' | grep "^\s" | cut -d':' -f1 | awk '{print $1}'
         )
         SUM_DOMAIN=`echo "${ALL_DOMAIN}" | wc -l`
         SUB_DOMAIN=$(echo {
@@ -115,11 +124,19 @@ _cpanel(){
             echo "        }"
         )
     fi
+    
+    # Package
+    _package PKG_NAME PLAN
+    _package PKG_OWNER OWNER    
+    _package PKG_DISK DISK_BLOCK_LIMIT
+    _package PKG_BW BWLIMIT
+    _package PKG_DOMAIN_ADDON MAXADDON
+    _package PKG_DOMAIN_ALIAS MAXPARK
+    _package PKG_DOMAIN_SUB MAXSUB
 }
 
 _directadmin(){
     # User
-    USER_NAME=`cat ${BACKUP_DIR}/backup/user.conf | grep "^username=" | cut -d'=' -f2`
     USER_PASS=`cat ${BACKUP_DIR}/backup/.shadow`
     USER_SHELL=`cat ${BACKUP_DIR}/backup/user.conf | grep "^ssh=" | cut -d'=' -f2`
     if [ "${USER_SHELL}" == "ON" ]
@@ -158,7 +175,7 @@ _directadmin(){
             then
                 echo -n "            \"${DOMAIN}\": \"${ALIAS_DOMAIN2}\""
             else
-                echo -n "            \"${DOMAIN}\": \"[$(echo "${ALIAS_DOMAIN2}" | sed ':a;N;$!ba;s/\n/, /g')]\""
+                echo -n "            \"${DOMAIN}\": [$(echo "${ALIAS_DOMAIN2}" | sed 's/^/"/g;s/$/"/g' | sed ':a;N;$!ba;s/\n/, /g')]"
             fi
             if [ $i_ALIAS_DOMAIN -lt ${SUM_ALIAS} ]
             then
@@ -188,7 +205,7 @@ _directadmin(){
             then
                 echo -n "            \"$i\": \"${SUB_DOMAIN2}\""
             else
-                echo -n "            \"$i\": \"[$(echo "${SUB_DOMAIN2}" | sed ':a;N;$!ba;s/\n/, /g')]\""
+                echo -n "            \"$i\": [$(echo "${SUB_DOMAIN2}" | sed 's/^/"/g;s/$/"/g' | sed ':a;N;$!ba;s/\n/, /g')]"
             fi
             if [ $i_SUB_DOMAIN -lt ${SUM_DOMAIN} ]
             then
@@ -249,6 +266,15 @@ _directadmin(){
             echo "        }"
         )
     fi
+    
+    # Package
+    _package PKG_NAME package
+    _package PKG_OWNER creator    
+    _package PKG_DISK quota
+    _package PKG_BW bandwidth
+    _package PKG_DOMAIN_ADDON vdomains
+    _package PKG_DOMAIN_ALIAS domainptr
+    _package PKG_DOMAIN_SUB nsubdomains
 }
 
 RANDOM_STRING=`date +%s | sha256sum | base64 | head -c 12`
@@ -275,9 +301,15 @@ fi
 
 if [ -f "${BACKUP_DIR}/backup/user.conf" ]
 then
+    CP="directadmin"
+    USER_NAME=`cat ${BACKUP_DIR}/backup/user.conf | grep "^username=" | cut -d'=' -f2`
+    USER_CONF="${BACKUP_DIR}/backup/user.conf"
     _directadmin
 elif [ -f "${BACKUP_DIR}/userdata/main" ]
 then
+    CP="cpanel"
+    USER_NAME=`ls -1 ${BACKUP_DIR}/cp`
+    USER_CONF="${BACKUP_DIR}/cp/${USER_NAME}"
     _cpanel
 else
     echo "Can not show information, exit!"
@@ -303,6 +335,15 @@ cat << EOF
     "database": {
         "all": ${ALL_DATABASE2},
         "privilege": ${PRIVILEGES}
+    },
+    "package": {
+        "name": "${PKG_NAME}",
+        "owner": "${PKG_OWNER}",
+        "disk": "${PKG_DISK}",
+        "bandwidth": "${PKG_BW}",
+        "domain_addon": "${PKG_DOMAIN_ADDON}",
+        "domain_alias": "${PKG_DOMAIN_ALIAS}",
+        "domain_sub": "${PKG_DOMAIN_SUB}"     
     }
 }
 EOF
